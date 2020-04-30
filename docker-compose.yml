@@ -1,18 +1,8 @@
-version: '2'
+version: "3.6"
 
 services:
-    
-    proxy:
-        build: .
-        ports:
-            - "127.0.0.1:13194:13194"
-            #- "127.0.0.1:13194:13194/udp"
-        # UDP did not work, probably because the source port changes all the time
-        #command: -v UDP4-RECVFROM:13194,fork UDP4-SENDTO:172.17.0.1:1194
-        command: TCP-LISTEN:13194,fork TCP:172.17.0.1:1194
-        restart: always
-
     openvpn:
+        container_name: openvpn
         image: kylemanna/openvpn
         volumes:
             - .:/local
@@ -22,7 +12,21 @@ services:
             - NET_ADMIN
         environment:
             dest: docker-for-mac.ovpn
-            DEBUG: '1'
+            DEBUG: "1"
         command: /local/helpers/run.sh
         restart: always
 
+    openvpn-proxy:
+        container_name: openvpn-proxy
+        image: alpine/socat:1.0.2
+        ports:
+            - "127.0.0.1:13194:13194"
+        command: TCP-LISTEN:13194,fork TCP:172.17.0.1:1194
+        restart: always
+        depends_on:
+            - openvpn
+
+networks:
+    default:
+        driver: bridge
+        name: docker-for-mac-openvpn
