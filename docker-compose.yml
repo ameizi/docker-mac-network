@@ -3,7 +3,7 @@ version: "3.6"
 services:
     openvpn:
         container_name: openvpn
-        image: kylemanna/openvpn
+        image: kylemanna/openvpn:2.3
         volumes:
             - .:/local
             - ./config:/etc/openvpn
